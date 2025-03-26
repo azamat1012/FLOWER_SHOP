@@ -116,3 +116,5 @@ SESSION_COOKIE_SECURE = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+YOOKASSA_SHOP_ID = env.int('YOOKASSA_SHOP_ID')
+YOOKASSA_SECRET_KEY = env.str('YOOKASSA_SECRET_KEY')

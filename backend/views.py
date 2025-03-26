@@ -1,6 +1,28 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+
+from yookassa import Configuration, Payment
+
+from FlowerShop import settings
 
 
+def create_payment(request):
+    Configuration.account_id = settings.YOOKASSA_SHOP_ID
+    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
+    payment = Payment.create({
+        "amount": {
+            "value": '100',
+            "currency": "RUB"
+        },
+        "capture_mode": "AUTOMATIC",
+        "confirmation": {
+            "type": "redirect",
+            "return_url": "http://127.0.0.1:8000/"
+        },
+        "description": f"Оплата заказа на сумму 100 руб."
+    })
+
+    return redirect(payment.confirmation.confirmation_url)
 def home(request):
     return render(request, 'index.html')
 
