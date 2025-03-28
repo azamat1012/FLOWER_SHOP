@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Staff, Customer, Bouquet, Component, BouquetComponent, Order
+from .models import Staff, Customer, Bouquet, Component, BouquetComponent, Order, Event, PriceInterval
 from django.utils.html import format_html
 
 
@@ -43,16 +43,23 @@ class BouquetComponentInline(admin.TabularInline):
     model = BouquetComponent
     extra = 0
     fields = ('component', 'quantity') 
+    
 
 @admin.register(Bouquet)
 class BouquetAdmin(admin.ModelAdmin):
     inlines = [
-        BouquetComponentInline,
+        BouquetComponentInline
     ]
-    list_display = ["name", "base_price", "view_composition", "available"]
-    list_filter = ["available"]
+    list_display = ["name", "base_price", "view_composition", "available", "view_events", "price_interval"]
+    list_filter = ["available", "events", "price_interval"]
     readonly_fields = ["image_preview", "view_composition"]
-    search_fields = ["name"]
+    search_fields = ["name", "events", "base_price"]
+    
+    
+    def view_events(self, obj):
+        return ", ".join(f"{event}" for event in obj.events.all())
+    
+    view_events.short_description = "События"  
     
     def view_composition(self, obj):
         return ", ".join(f"{name} - {qty} шт." for name, qty in obj.composition())  
@@ -75,3 +82,14 @@ class BouquetAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ["bouquet", "client", "flowerist", "courier", "total_cost", "created_at"]
     search_fields = ["bouquet", "client", "flowerist", "courier", "total_cost", "created_at"]
+    
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ["name"]
+    search_fields = ["name"]
+    
+@admin.register(PriceInterval)
+class PriceIntervalAdmin(admin.ModelAdmin):
+    list_display = ["__str__"]
+    search_fields = ["__str__"]

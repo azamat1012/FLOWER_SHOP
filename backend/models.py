@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
-from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 
 class Staff(models.Model):
@@ -14,12 +14,7 @@ class Staff(models.Model):
         ("flowerist", "Флорист"),
         ("courier", "Курьер"),
     ]
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="staff",
-        verbose_name="Связанный юзер",
-    )
+   
     role = models.CharField(
         max_length=20, choices=ROLE_CHOICES, verbose_name="Должность"
     )
@@ -30,11 +25,6 @@ class Staff(models.Model):
     phone = PhoneNumberField(verbose_name="Телефон", unique=True, blank=False, null=True)
     on_vacation = models.BooleanField(verbose_name="В отпуске", default=False)
 
-    def get_flowerist_orders(self):
-        return self.flowerist_orders.all()
-
-    def get_courier_orders(self):
-        return self.courier_orders.all()
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -55,12 +45,6 @@ class Staff(models.Model):
 class Customer(models.Model):
     """Модель клиента, связанная с пользователями Django"""
 
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="client",
-        verbose_name="Связанный юзер",
-    )
     name = models.CharField(verbose_name="ФИО", max_length=50)
     phone = PhoneNumberField(verbose_name="Телефон", unique=True)
 
@@ -119,6 +103,8 @@ class Bouquet(models.Model):
     image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
     description = models.CharField(verbose_name="описание", max_length=100)
     available = models.BooleanField(default=True, verbose_name="В наличии")
+    events = models.ManyToManyField("Event", related_name="bouquets", verbose_name="События", blank=True)
+    price_interval = models.ForeignKey("PriceInterval", on_delete=models.CASCADE, related_name="bouquets", verbose_name="Ценовой интервал", blank=True, null=True)
 
     def composition(self):
         return [(item.component, item.quantity) for item in self.components.all()]
@@ -154,22 +140,22 @@ class BouquetComponent(models.Model):
 class Order(models.Model):
     """Модель заказа"""
 
-    bouquet = models.ForeignKey(Bouquet, verbose_name="Букет", on_delete=models.PROTECT)
+    bouquet = models.ForeignKey("Bouquet", verbose_name="Букет", on_delete=models.PROTECT)
     client = models.ForeignKey(
-        Customer,
+        "Customer",
         verbose_name="Клиент",
         on_delete=models.CASCADE,
         related_name="client_orders",
     )
     flowerist = models.ForeignKey(
-        Staff,
+        "Staff",
         verbose_name="Флорист",
         on_delete=models.CASCADE,
         related_name="flowerist_orders",
         limit_choices_to={"role": "flowerist"},
     )
     courier = models.ForeignKey(
-        Staff,
+        "Staff",
         verbose_name="Курьер",
         on_delete=models.CASCADE,
         related_name="courier_orders",
@@ -195,3 +181,47 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+        
+
+
+class Event(models.Model):
+    
+    name = models.CharField(max_length=200, verbose_name="Тип события")
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Событие"
+        verbose_name_plural = "События"
+
+
+class PriceInterval(models.Model):
+    
+    min_price = models.PositiveIntegerField(verbose_name="Минимальная цена", unique=True, default=0)
+    max_price = models.PositiveIntegerField(verbose_name="Максимальная цена", unique=True, default=1)
+
+    def __str__(self):
+        return f"{self.min_price} - {self.max_price}"
+    
+    
+    def clean(self):
+        if self.min_price > 99999:
+            raise ValidationError("Минимальная цена не может превышать 99 999")
+        
+        if self.max_price > 100000:
+            raise ValidationError("Максимальная цена не может превышать 100 000")
+        
+        if self.min_price >= self.max_price:
+            raise ValidationError("Минимальная цена должна быть меньше максимальной")
+        
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Ценовой интервал"
+        verbose_name_plural = "Ценовые интервалы"
+        ordering = ['min_price']
+
+    
