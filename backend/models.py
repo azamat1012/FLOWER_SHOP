@@ -14,7 +14,7 @@ class Staff(models.Model):
         ("flowerist", "Флорист"),
         ("courier", "Курьер"),
     ]
-   
+
     role = models.CharField(
         max_length=20, choices=ROLE_CHOICES, verbose_name="Должность"
     )
@@ -22,9 +22,10 @@ class Staff(models.Model):
         max_length=225, verbose_name="ID персонала", unique=True, blank=True, null=True
     )
     name = models.CharField(verbose_name="ФИО", max_length=50)
-    phone = PhoneNumberField(verbose_name="Телефон", unique=True, blank=False, null=True)
+    phone = PhoneNumberField(
+        verbose_name="Телефон", unique=True, blank=False, null=True
+    )
     on_vacation = models.BooleanField(verbose_name="В отпуске", default=False)
-
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -102,9 +103,10 @@ class Bouquet(models.Model):
     )
     image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
     description = models.CharField(verbose_name="описание", max_length=100)
-    available = models.BooleanField(default=True, verbose_name="В наличии")
-    events = models.ManyToManyField("Event", related_name="bouquets", verbose_name="События", blank=True)
-    price_interval = models.ForeignKey("PriceInterval", on_delete=models.CASCADE, related_name="bouquets", verbose_name="Ценовой интервал", blank=True, null=True)
+    events = models.ManyToManyField(
+        "Event", related_name="bouquets", verbose_name="События", blank=True
+    )   
+    
 
     def composition(self):
         return [(item.component, item.quantity) for item in self.components.all()]
@@ -140,7 +142,9 @@ class BouquetComponent(models.Model):
 class Order(models.Model):
     """Модель заказа"""
 
-    bouquet = models.ForeignKey("Bouquet", verbose_name="Букет", on_delete=models.PROTECT)
+    bouquet = models.ForeignKey(
+        "Bouquet", verbose_name="Букет", on_delete=models.PROTECT
+    )
     client = models.ForeignKey(
         "Customer",
         verbose_name="Клиент",
@@ -177,44 +181,46 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.pk} - {self.client.name} {self.created_at}"
-    
+
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
-        
 
 
 class Event(models.Model):
-    
+
     name = models.CharField(max_length=200, verbose_name="Тип события")
-    
+
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = "Событие"
         verbose_name_plural = "События"
 
 
 class PriceInterval(models.Model):
-    
-    min_price = models.PositiveIntegerField(verbose_name="Минимальная цена", unique=True, default=0)
-    max_price = models.PositiveIntegerField(verbose_name="Максимальная цена", unique=True, default=1)
+
+    min_price = models.PositiveIntegerField(
+        verbose_name="Минимальная цена", unique=True, default=0
+    )
+    max_price = models.PositiveIntegerField(
+        verbose_name="Максимальная цена", unique=True, default=1
+    )
 
     def __str__(self):
         return f"{self.min_price} - {self.max_price}"
-    
-    
+
     def clean(self):
         if self.min_price > 99999:
             raise ValidationError("Минимальная цена не может превышать 99 999")
-        
+
         if self.max_price > 100000:
             raise ValidationError("Максимальная цена не может превышать 100 000")
-        
+
         if self.min_price >= self.max_price:
             raise ValidationError("Минимальная цена должна быть меньше максимальной")
-        
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -222,6 +228,4 @@ class PriceInterval(models.Model):
     class Meta:
         verbose_name = "Ценовой интервал"
         verbose_name_plural = "Ценовые интервалы"
-        ordering = ['min_price']
-
-    
+        ordering = ["min_price"]

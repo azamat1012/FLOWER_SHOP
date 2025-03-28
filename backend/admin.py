@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Staff, Customer, Bouquet, Component, BouquetComponent, Order, Event, PriceInterval
+from .models import (
+    Staff,
+    Customer,
+    Bouquet,
+    Component,
+    BouquetComponent,
+    Order,
+    Event,
+    PriceInterval,
+)
 from django.utils.html import format_html
 
 
@@ -25,7 +34,7 @@ class ComponentAdmin(admin.ModelAdmin):
     list_filter = ["type"]
     search_fields = ["name", "stock"]
     readonly_fields = ["image_preview"]
-    
+
     def image_preview(self, obj):
         if obj.image:
             return format_html(
@@ -35,37 +44,39 @@ class ComponentAdmin(admin.ModelAdmin):
                 url=obj.image.url,
             )
         return "No Image"
-    
+
     image_preview.short_description = "Превью изображения"
 
 
 class BouquetComponentInline(admin.TabularInline):
     model = BouquetComponent
     extra = 0
-    fields = ('component', 'quantity') 
-    
+    fields = ("component", "quantity")
+
 
 @admin.register(Bouquet)
 class BouquetAdmin(admin.ModelAdmin):
-    inlines = [
-        BouquetComponentInline
+    inlines = [BouquetComponentInline]
+    list_display = [
+        "name",
+        "base_price",
+        "view_composition",
+        "view_events",
     ]
-    list_display = ["name", "base_price", "view_composition", "available", "view_events", "price_interval"]
-    list_filter = ["available", "events", "price_interval"]
+    list_filter = ["events"]
     readonly_fields = ["image_preview", "view_composition"]
     search_fields = ["name", "events", "base_price"]
-    
-    
+
     def view_events(self, obj):
         return ", ".join(f"{event}" for event in obj.events.all())
-    
-    view_events.short_description = "События"  
-    
+
+    view_events.short_description = "События"
+
     def view_composition(self, obj):
-        return ", ".join(f"{name} - {qty} шт." for name, qty in obj.composition())  
-    
-    view_composition.short_description = "Состав композиции"    
-        
+        return ", ".join(f"{name} - {qty} шт." for name, qty in obj.composition())
+
+    view_composition.short_description = "Состав композиции"
+
     def image_preview(self, obj):
         if obj.image:
             return format_html(
@@ -78,17 +89,33 @@ class BouquetAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Превью изображения"
 
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ["bouquet", "client", "flowerist", "courier", "total_cost", "created_at"]
-    search_fields = ["bouquet", "client", "flowerist", "courier", "total_cost", "created_at"]
-    
+    list_display = [
+        "bouquet",
+        "client",
+        "flowerist",
+        "courier",
+        "total_cost",
+        "created_at",
+    ]
+    search_fields = [
+        "bouquet",
+        "client",
+        "flowerist",
+        "courier",
+        "total_cost",
+        "created_at",
+    ]
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = ["name"]
     search_fields = ["name"]
-    
+
+
 @admin.register(PriceInterval)
 class PriceIntervalAdmin(admin.ModelAdmin):
     list_display = ["__str__"]
