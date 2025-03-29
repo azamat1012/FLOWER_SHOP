@@ -7,7 +7,7 @@ from .models import (
     BouquetComponent,
     Order,
     Event,
-    PriceInterval,
+    PriceInterval, Consultation
 )
 from django.utils.html import format_html
 
@@ -19,6 +19,13 @@ class StaffAdmin(admin.ModelAdmin):
     list_filter = ["role", "on_vacation"]
     search_fields = ["name"]
     ordering = ["role", "name"]
+
+
+@admin.register(Consultation)
+class ConsultationAdmin(admin.ModelAdmin):
+    list_display = ["name", "phone"]
+    list_filter = ["created_at"]
+    search_fields = ["created_at"]
 
 
 @admin.register(Customer)
