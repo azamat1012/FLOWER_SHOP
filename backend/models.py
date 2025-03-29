@@ -46,14 +46,13 @@ class Staff(models.Model):
 class Customer(models.Model):
     """Модель клиента, связанная с пользователями Django"""
 
-    name = models.CharField(verbose_name="ФИО", max_length=50)
+    name = models.CharField(verbose_name="ФИО", max_length=50, unique=True)
     phone = PhoneNumberField(verbose_name="Телефон", unique=True)
 
     def __str__(self):
         return f"{self.name}-{self.pk}"
 
     class Meta:
-        unique_together = ["name", "phone"]
         verbose_name = "Клиент"
         verbose_name_plural = "Клиенты"
 
@@ -69,17 +68,20 @@ class Component(models.Model):
     type = models.CharField(
         max_length=20, choices=TYPE_CHOICES, verbose_name="Тип элемента"
     )
-    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название",
+                            max_length=50, unique=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, default=1.00, verbose_name="Стоимость (руб.)"
     )
-    image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
+    image = models.ImageField(
+        verbose_name="Изображение", blank=True, null=True)
     note = models.CharField(
         verbose_name="Примечания",
         max_length=100,
         blank=True,
     )
-    stock = models.PositiveIntegerField(default=0, verbose_name="Стоковое количество")
+    stock = models.PositiveIntegerField(
+        default=0, verbose_name="Стоковое количество")
 
     def __str__(self):
         return self.name
@@ -94,19 +96,26 @@ class Component(models.Model):
 class Bouquet(models.Model):
     """Модель букета"""
 
-    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название",
+                            max_length=50, unique=True)
     base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=1.00,
         verbose_name="Стоимость оформления (руб.)",
     )
-    image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
+    image = models.ImageField(
+        verbose_name="Изображение", null=True)
     description = models.CharField(verbose_name="описание", max_length=100)
     events = models.ManyToManyField(
         "Event", related_name="bouquets", verbose_name="События", blank=True
-    )   
-    
+    )
+
+    def get_price(self):
+        total_price = self.base_price
+        for bouquet_component in self.components.all():
+            total_price += bouquet_component.component.price * bouquet_component.quantity
+        return total_price
 
     def composition(self):
         return [(item.component, item.quantity) for item in self.components.all()]
@@ -167,7 +176,8 @@ class Order(models.Model):
     )
     address = models.TextField(verbose_name="Адрес")
     desired_date = models.DateTimeField(verbose_name="Дата")
-    desired_time = models.TimeField(verbose_name="Время")
+    # desired_time = models.TimeField(verbose_name="Время")
+    desired_time = models.CharField(max_length=50, verbose_name="Время")
     flowerist_comment = models.CharField(
         max_length=200, verbose_name="Комментарии флористу", blank=True, null=True
     )
@@ -216,10 +226,12 @@ class PriceInterval(models.Model):
             raise ValidationError("Минимальная цена не может превышать 99 999")
 
         if self.max_price > 100000:
-            raise ValidationError("Максимальная цена не может превышать 100 000")
+            raise ValidationError(
+                "Максимальная цена не может превышать 100 000")
 
         if self.min_price >= self.max_price:
-            raise ValidationError("Минимальная цена должна быть меньше максимальной")
+            raise ValidationError(
+                "Минимальная цена должна быть меньше максимальной")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -229,3 +241,20 @@ class PriceInterval(models.Model):
         verbose_name = "Ценовой интервал"
         verbose_name_plural = "Ценовые интервалы"
         ordering = ["min_price"]
+
+
+class Consultation(models.Model):
+    """Модель консультации"""
+    name = models.CharField(verbose_name="Имя", max_length=50)
+    phone = PhoneNumberField(verbose_name="Телефон")
+    agreed_to_privacy = models.BooleanField(
+        verbose_name="Согласие на обработку данных", default=False)
+    created_at = models.DateTimeField(
+        verbose_name="Дата создания", auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.phone}"
+
+    class Meta:
+        verbose_name = "Консультация"
+        verbose_name_plural = "Консультации"
