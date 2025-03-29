@@ -1,0 +1,29 @@
+{% load static %}
+<footer id="footer"> 
+    <div class="container">
+        <div class="footer">
+            <a href="/"><img src="{% static 'images/logo.svg' %} " alt="logo" class="logo footer__logo"></a>
+            <nav>
+                <ul class="menu footer__menu ficc">
+                    <li class="menu__item">
+                        <a href="{% url 'catalog' %}" class="menu__item_link"
+                          >Каталог</a
+                        >
+                      </li>
+                      <li class="menu__item">
+                        <a href="{% url 'recommendation' %}" class="menu__item_link"
+                          >Рекомендации</a
+                        >
+                      </li>
+                      <li class="menu__item">
+                        <a href="{% url 'consultation' %}" class="menu__item_link"
+                          >Контакты</a
+                        >
+                </ul>
+            </nav>
+            <hr class="line"></hr>
+            <a href="#" class="footer__poli">Политика конфиденциальности</a>
+            <p class="footer_cop">©️2022. FlowerShop. Все права защищены</p>
+        </div>
+    </div>
+</footer>
