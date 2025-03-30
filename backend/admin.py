@@ -7,9 +7,11 @@ from .models import (
     BouquetComponent,
     Order,
     Event,
-    PriceRange, Consultation
+    PriceRange,
+    Consultation,
 )
 from django.utils.html import format_html
+from django.contrib.admin import action
 
 
 # Register your models here.
@@ -71,7 +73,7 @@ class BouquetAdmin(admin.ModelAdmin):
         "view_events",
     ]
     list_filter = ["events"]
-    readonly_fields = ["image_preview", "view_composition","total_price"]
+    readonly_fields = ["image_preview", "view_composition", "total_price"]
     search_fields = ["name", "events", "total_price"]
 
     def save_related(self, request, form, formsets, change):

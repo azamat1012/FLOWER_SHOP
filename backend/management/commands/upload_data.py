@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.files import File
 from pathlib import Path
 from django.conf import settings
-from django.db.utils import IntegrityError
+from decimal import Decimal
 
 
 class Command(BaseCommand):
@@ -31,17 +31,17 @@ class Command(BaseCommand):
                 data = json.load(jfile)
 
             with transaction.atomic():
-                
+
                 for price_item in data.get("prices", []):
-                    min_price = price_item.get("min_price", 0)
-                    max_price = price_item.get("max_price", 0)
-                    price, created = PriceRange.objects.get_or_create(min_price=min_price, max_price=max_price)
+                    min_price = Decimal(price_item.get("min_price", 0))
+                    max_price = Decimal(price_item.get("max_price", 0))
+                    price, created = PriceRange.objects.get_or_create(
+                        min_price=min_price, max_price=max_price
+                    )
                     if created:
                         self.stdout.write(
                             self.style.SUCCESS(f"Добавлен интервал цен: {price.name}")
                         )
-
-                        
 
                 components = {}
                 for component_data in data.get("components", []):
@@ -49,9 +49,9 @@ class Command(BaseCommand):
                         name=component_data["name"],
                         defaults={
                             "type": component_data["type"],
-                            "price": component_data["price"],
+                            "price": Decimal(component_data["price"]),
                             "note": component_data.get("note", ""),
-                            "stock": component_data.get("stock", 0),
+                            "stock": int(component_data.get("stock", 0)),
                         },
                     )
 
@@ -62,7 +62,7 @@ class Command(BaseCommand):
                                 component.image.save(
                                     component_data["image"], File(img_file), save=True
                                 )
-                                
+
                     components[component.name] = component
                     if created:
                         self.stdout.write(
@@ -71,7 +71,7 @@ class Command(BaseCommand):
 
                 for bouquet_data in data.get("bouquets", []):
                     bouquet_name = bouquet_data.get("name")
-                    bouquet_base_price = bouquet_data.get("base_price")
+                    bouquet_base_price = Decimal(bouquet_data.get("base_price"))
                     bouquet_image = bouquet_data.get("image")
                     bouquet_description = bouquet_data.get("description")
 
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                                     bouquet_data["image"], File(img_file), save=True
                                 )
                         else:
-                            image_path = Path(media_root) / 'images/default.jpg'
+                            image_path = Path(media_root) / "images/default.jpg"
                             with open(image_path, "rb") as img_file:
                                 bouquet.image.save(
                                     bouquet_data["image"], File(img_file), save=True
@@ -140,6 +140,8 @@ class Command(BaseCommand):
                         self.stdout.write(
                             self.style.SUCCESS(f"Добавлен букет: {bouquet_name}")
                         )
+
+                    bouquet.total_price = bouquet.get_price()
                     bouquet.save()
 
             self.stdout.write(self.style.SUCCESS("Загрузка данных завершена!"))

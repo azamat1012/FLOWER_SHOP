@@ -174,7 +174,9 @@ class Event(models.Model):
 
 class PriceRange(models.Model):
     name = models.CharField(
-        max_length=100, verbose_name="Название диапазона (например, 'До 1 000 руб')", unique=True
+        max_length=100,
+        verbose_name="Название диапазона (например, 'До 1 000 руб')",
+        unique=True,
     )
     min_price = models.DecimalField(
         max_digits=10,
@@ -190,7 +192,7 @@ class PriceRange(models.Model):
         blank=True,
         verbose_name="Максимальная цена (может быть NULL для отсутствия ограничений)",
     )
-    
+
     def get_name(self):
         if self.min_price and self.max_price:
             return f"От {int(self.min_price)} до {int(self.max_price)} руб."
@@ -202,7 +204,7 @@ class PriceRange(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = self.get_name()
