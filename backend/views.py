@@ -24,7 +24,7 @@ def create_payment(request):
         "capture_mode": "AUTOMATIC",
         "confirmation": {
             "type": "redirect",
-            "return_url": "http://127.0.0.1:8000/   "
+            "return_url": f"http://{request.get_host()}/"
         },
         "description": f"Оплата заказа на сумму {amount} руб."
     })
