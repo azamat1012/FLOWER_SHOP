@@ -71,8 +71,14 @@ class BouquetAdmin(admin.ModelAdmin):
         "view_events",
     ]
     list_filter = ["events"]
-    readonly_fields = ["image_preview", "view_composition"]
+    readonly_fields = ["image_preview", "view_composition","total_price"]
     search_fields = ["name", "events", "total_price"]
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        bouquet = form.instance
+        bouquet.total_price = bouquet.get_price()
+        bouquet.save(update_fields=["total_price"])
 
     def view_events(self, obj):
         return ", ".join(f"{event}" for event in obj.events.all())
