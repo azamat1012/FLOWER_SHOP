@@ -12,7 +12,7 @@
 		<div class="container">
 			<div class="card ficb">
 				<div class="card__block card__block_first">
-					<img src="{{bouquet.image.url}}" alt="{{bouquet.name}}" class="card__img">
+					<img src="{% if bouquet.image %}{{ bouquet.image.url }}{% endif %}" alt="{{bouquet.name}}" class="card__img">
 				</div>
 				<div class="card__block card__block_sec">
 					<div class="title">{{ bouquet.name }}</div>

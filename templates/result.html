@@ -16,7 +16,7 @@
             <div class="result__block ficb">
                 {% for bouquet in bouquets %}
                 <div class="result__items">
-                    <img src="{{ bouquet.image.url }}" alt="{{ bouquet.name }}" class="result__block_img">
+                    <img src="{% if bouquet.image %}{{ bouquet.image.url }}{% endif %}" alt="{{ bouquet.name }}" class="result__block_img">
                     <div class="title result__items_title">{{ bouquet.name }}</div>
                     <div class="result__items_price">{{ bouquet.total_price }} руб.</div>
                     <button class="btn result__items_btn" onclick="window.location.href='{% url 'create_order' %}?bouquet_id={{ bouquet.id }}'">Заказать букет</button>

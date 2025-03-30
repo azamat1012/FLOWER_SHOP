@@ -1,0 +1,61 @@
+{
+    "components": [
+      {
+        "type": "flower",
+        "name": "Роза белая",
+        "price": "150.00",
+        "note": "Голландия",
+        "stock": 25
+      },
+      {
+        "type": "accessory",
+        "name": "Лента атласная",
+        "price": "50.00",
+        "note": "Ширина 5см",
+        "stock": 100
+      },
+      {
+        "type": "flower",
+        "name": "Роза черная",
+        "price": "150.00",
+        "note": "Голландия",
+        "stock": 25
+      }
+    ],
+    "bouquets": [
+      {
+        "name": "Романтический букет",
+        "base_price": "500.00",
+        "image": "romantic.jpg",
+        "description": "Букет для романтического вечера",
+        "events": ["Свадьба", "Юбилей"],
+        "components": [
+          {
+            "name": "Роза белая",
+            "quantity": 25
+          },
+          {
+            "name": "Лента атласная",
+            "quantity": 1
+          }
+        ]
+      }, 
+      {
+        "name": "Похоронный букет",
+        "base_price": "700.00",
+        "image": "funeral.jpg",
+        "description": "Букет для похорон",
+        "events": ["Похороны"],
+        "components": [
+          {
+            "name": "Роза черная",
+            "quantity": 4
+          },
+          {
+            "name": "Упаковка полиэтилен",
+            "quantity": 10
+          }
+        ]
+      }
+    ]
+  }
