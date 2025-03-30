@@ -5,6 +5,7 @@ from django.db import transaction
 from django.core.files import File
 from pathlib import Path
 from django.conf import settings
+from django.db.utils import IntegrityError
 
 
 class Command(BaseCommand):
@@ -32,10 +33,9 @@ class Command(BaseCommand):
             with transaction.atomic():
                 
                 for price_item in data.get("prices", []):
-                    price_name=price_item.get("name", '')
                     min_price = price_item.get("min_price", 0)
                     max_price = price_item.get("max_price", 0)
-                    price, created = PriceRange.objects.get_or_create(name=price_name, min_price=min_price, max_price=max_price)
+                    price, created = PriceRange.objects.get_or_create(min_price=min_price, max_price=max_price)
                     if created:
                         self.stdout.write(
                             self.style.SUCCESS(f"Добавлен интервал цен: {price.name}")
