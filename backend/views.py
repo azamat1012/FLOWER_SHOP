@@ -2,7 +2,7 @@
 from django.views.generic import DetailView
 
 from FlowerShop import settings
-from .models import Bouquet, Consultation, Order
+from .models import Bouquet, Consultation, Order, PriceRange
 
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -92,28 +92,38 @@ def get_consultation(request):
 
     return render(request, 'consultation.html')
 
-
-# def get_recommendations(request):
-    # all_bouquets = list(Bouquet.objects.all())
-    # if not all_bouquets:
-    #     return render(request, 'card.html', {'bouquet': None})
-    # random_bouquet = random.choice(all_bouquets)
-    #
-    # return render(request, 'card.html', {
-    #     'bouquet': random_bouquet,
-    # })  card.html это detail букета я написал класс для отображения детальной информации по букету
-
-
-
-# =============================Еще не сделано=============================
-
 def get_quiz_first(request):
+    if request.method == 'POST':
+        event = request.POST.get('event')
+        request.session['event'] = event
+        return redirect('quiz_2')
     return render(request, 'quiz.html')
 
 
 def get_quiz_second(request):
-    return render(request, 'quiz-step.html')
+    if request.method == 'POST':
+        budget = request.POST.get('budget')
+        request.session['budget'] = budget
+        return redirect('result')
+    price_ranges = PriceRange.objects.all()
+    print(price_ranges)
+    return render(request, 'quiz-step.html', {'price_ranges': price_ranges})
 
 
-def make_order(request):
-    return render(request, 'result.html')
+def quiz_results(request):
+    event = request.session.get('event')
+    budget = request.session.get('budget')
+    bouquets = Bouquet.objects.all()
+    if budget:
+        price_range = PriceRange.objects.filter(name=budget).first()
+        if price_range:
+            if price_range.min_price is not None:
+                bouquets = bouquets.filter(total_price__gte=price_range.min_price)
+            if price_range.max_price is not None:
+                bouquets = bouquets.filter(total_price__lte=price_range.max_price)
+
+    return render(request, 'result.html', {
+        'event': event,
+        'budget': budget,
+        'bouquets': bouquets
+    })

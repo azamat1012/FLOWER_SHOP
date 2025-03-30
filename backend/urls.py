@@ -11,7 +11,7 @@ urlpatterns = [
     path('consultation/', views.get_consultation, name='consultation'),
     path('create-order/', views.create_order, name="create_order"),
 
-    path('make_order/', views.make_order, name='result'),
+    path('make_order/', views.quiz_results, name='result'),
     path('payment/', views.create_payment, name='payment'),
     path('bouquet/<int:pk>/', views.BouquetDetailView.as_view(), name='bouquet_detail')
 ]

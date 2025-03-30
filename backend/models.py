@@ -110,12 +110,17 @@ class Bouquet(models.Model):
     events = models.ManyToManyField(
         "Event", related_name="bouquets", verbose_name="События", blank=True
     )
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Общая стоимость')
 
     def get_price(self):
         total_price = self.base_price
         for bouquet_component in self.components.all():
             total_price += bouquet_component.component.price * bouquet_component.quantity
         return total_price
+
+    def save(self, *args, **kwargs):
+        self.total_price = self.get_price()
+        super().save(*args, **kwargs)
 
     def composition(self):
         return [(item.component, item.quantity) for item in self.components.all()]
@@ -172,38 +177,21 @@ class Event(models.Model):
         verbose_name_plural = "События"
 
 
-class PriceInterval(models.Model):
-
-    min_price = models.PositiveIntegerField(
-        verbose_name="Минимальная цена", unique=True, default=0
-    )
-    max_price = models.PositiveIntegerField(
-        verbose_name="Максимальная цена", unique=True, default=1
-    )
+class PriceRange(models.Model):
+    name = models.CharField(max_length=100, help_text="Название диапазона (например, 'До 1 000 руб')")
+    min_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                    help_text="Минимальная цена (может быть NULL для отсутствия ограничения)")
+    max_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+                                    help_text="Максимальная цена (может быть NULL для отсутствия ограничений)")
 
     def __str__(self):
-        return f"{self.min_price} - {self.max_price}"
-
-    def clean(self):
-        if self.min_price > 99999:
-            raise ValidationError("Минимальная цена не может превышать 99 999")
-
-        if self.max_price > 100000:
-            raise ValidationError(
-                "Максимальная цена не может превышать 100 000")
-
-        if self.min_price >= self.max_price:
-            raise ValidationError(
-                "Минимальная цена должна быть меньше максимальной")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = "Ценовой интервал"
-        verbose_name_plural = "Ценовые интервалы"
-        ordering = ["min_price"]
+        if self.min_price and self.max_price:
+            return f"{self.name} ({self.min_price} - {self.max_price})"
+        elif self.min_price:
+            return f"{self.name} (От {self.min_price})"
+        elif self.max_price:
+            return f"{self.name} (До {self.max_price})"
+        return self.name
 
 
 class Consultation(models.Model):

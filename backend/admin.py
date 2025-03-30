@@ -7,7 +7,7 @@ from .models import (
     BouquetComponent,
     Order,
     Event,
-    PriceInterval, Consultation
+    PriceRange, Consultation
 )
 from django.utils.html import format_html
 
@@ -66,13 +66,13 @@ class BouquetAdmin(admin.ModelAdmin):
     inlines = [BouquetComponentInline]
     list_display = [
         "name",
-        "base_price",
+        "total_price",
         "view_composition",
         "view_events",
     ]
     list_filter = ["events"]
     readonly_fields = ["image_preview", "view_composition"]
-    search_fields = ["name", "events", "base_price"]
+    search_fields = ["name", "events", "total_price"]
 
     def view_events(self, obj):
         return ", ".join(f"{event}" for event in obj.events.all())
@@ -123,7 +123,7 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ["name"]
 
 
-@admin.register(PriceInterval)
-class PriceIntervalAdmin(admin.ModelAdmin):
-    list_display = ["__str__"]
-    search_fields = ["__str__"]
+@admin.register(PriceRange)
+class PriceRangeAdmin(admin.ModelAdmin):
+    list_display = ["name", "min_price", "max_price"]
+    search_fields = ["name"]
