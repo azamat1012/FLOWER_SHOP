@@ -149,52 +149,15 @@ class BouquetComponent(models.Model):
 
 
 class Order(models.Model):
-    """Модель заказа"""
-
-    bouquet = models.ForeignKey(
-        "Bouquet", verbose_name="Букет", on_delete=models.PROTECT
-    )
-    client = models.ForeignKey(
-        "Customer",
-        verbose_name="Клиент",
-        on_delete=models.CASCADE,
-        related_name="client_orders",
-    )
-    flowerist = models.ForeignKey(
-        "Staff",
-        verbose_name="Флорист",
-        on_delete=models.CASCADE,
-        related_name="flowerist_orders",
-        limit_choices_to={"role": "flowerist"},
-    )
-    courier = models.ForeignKey(
-        "Staff",
-        verbose_name="Курьер",
-        on_delete=models.CASCADE,
-        related_name="courier_orders",
-        limit_choices_to={"role": "courier"},
-    )
-    address = models.TextField(verbose_name="Адрес")
-    desired_date = models.DateTimeField(verbose_name="Дата")
-    # desired_time = models.TimeField(verbose_name="Время")
-    desired_time = models.CharField(max_length=50, verbose_name="Время")
-    flowerist_comment = models.CharField(
-        max_length=200, verbose_name="Комментарии флористу", blank=True, null=True
-    )
-    delivery_comment = models.CharField(
-        max_length=200, verbose_name="Комментарии курьеру", blank=True, null=True
-    )
-    total_cost = models.FloatField(verbose_name="Общая стоимость", default=0.0)
-    created_at = models.DateTimeField(
-        verbose_name="Дата создания заказа", default=timezone.now
-    )
+    customer_name = models.CharField(max_length=255,blank=True)
+    customer_phone = models.CharField(max_length=15, blank=True)
+    delivery_address = models.TextField(blank=True)
+    delivery_time = models.CharField(max_length=50, blank=True)
+    bouquet = models.ForeignKey(Bouquet, on_delete=models.SET_NULL,null=True, blank=True, related_name="orders")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.pk} - {self.client.name} {self.created_at}"
-
-    class Meta:
-        verbose_name = "Заказ"
-        verbose_name_plural = "Заказы"
+        return f"Заказ #{self.id} от {self.customer_name}"
 
 
 class Event(models.Model):

@@ -100,19 +100,19 @@ class BouquetAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
+        "customer_name",
+        "customer_phone",
+        "delivery_address",
+        "delivery_time",
         "bouquet",
-        "client",
-        "flowerist",
-        "courier",
-        "total_cost",
         "created_at",
     ]
     search_fields = [
+        "customer_name",
+        "customer_phone",
+        "delivery_address",
+        "delivery_time",
         "bouquet",
-        "client",
-        "flowerist",
-        "courier",
-        "total_cost",
         "created_at",
     ]
 

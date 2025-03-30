@@ -31,14 +31,11 @@
 						<span class="card__elems_intro">Размер</span>
 						<div class="card__items">
 							<span class="card_items_intro">
-								Высота - 50 см
-							</span>
-							<span class="card_items_intro">
-								Ширина - 30 см
+								{{ bouquet.description }}
 							</span>
 						</div>
 					</div>
-					<button class="btn largeBtn card__btn" onclick="window.location.href='{%url 'order_1'%}?bouquet_id={{ bouquet.id }}'">Заказать букет</button>
+					<button class="btn largeBtn card__btn" onclick="window.location.href='{%url 'create_order'%}?bouquet_id={{ bouquet.id }}'">Заказать букет</button>
 				</div>
 			</div>
 		</div>

@@ -14,8 +14,9 @@
 			<div class="order__block">
 				<div class="order_items">
 					<div class="title">Оформление доставки</div>
-					<form action="{% url 'order_1' %}?bouquet_id={{ request.GET.bouquet_id }}" method="POST" class="order__form">
+					<form action="{% url 'create_order' %}" method="POST" class="order__form">
 						{% csrf_token %}
+                        <input type="hidden" name="bouquet_id" value="{{ bouquet_id }}">
 						<div class="order__form_block ficb">
 							<input type="text" name="fname" class="order__form_input" placeholder="Введите Имя" required>
 							<input type="text" name="tel" class="order__form_input" placeholder="+ 7 (999) 000 00 00" required>
