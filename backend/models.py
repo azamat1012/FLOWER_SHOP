@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from pathlib import Path
 
+
 class Staff(models.Model):
     """Модель персонала, связанная с пользователями Django"""
 
@@ -70,17 +71,20 @@ class Component(models.Model):
     type = models.CharField(
         max_length=20, choices=TYPE_CHOICES, verbose_name="Тип элемента"
     )
-    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название",
+                            max_length=50, unique=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, default=1.00, verbose_name="Стоимость (руб.)"
     )
-    image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
+    image = models.ImageField(
+        verbose_name="Изображение", blank=True, null=True)
     note = models.CharField(
         verbose_name="Примечания",
         max_length=100,
         blank=True,
     )
-    stock = models.PositiveIntegerField(default=0, verbose_name="Стоковое количество")
+    stock = models.PositiveIntegerField(
+        default=0, verbose_name="Стоковое количество")
 
     def __str__(self):
         return self.name
@@ -95,14 +99,15 @@ class Component(models.Model):
 class Bouquet(models.Model):
     """Модель букета"""
 
-    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название",
+                            max_length=50, unique=True)
     base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0.00,
         verbose_name="Стоимость оформления (руб.)",
     )
-    image = models.ImageField(verbose_name="Изображение", null=True, blank=True)
+    image = models.ImageField(verbose_name="Изображение", null=True)
     description = models.CharField(verbose_name="описание", max_length=100)
     events = models.ManyToManyField(
         "Event", related_name="bouquets", verbose_name="События", blank=True
@@ -166,7 +171,8 @@ class Order(models.Model):
 
 class Event(models.Model):
 
-    name = models.CharField(max_length=200, verbose_name="Тип события", unique=True)
+    name = models.CharField(
+        max_length=200, verbose_name="Тип события", unique=True)
 
     def __str__(self):
         return self.name
@@ -213,7 +219,8 @@ class Consultation(models.Model):
     agreed_to_privacy = models.BooleanField(
         verbose_name="Согласие на обработку данных", default=False
     )
-    created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
+    created_at = models.DateTimeField(
+        verbose_name="Дата создания", auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} - {self.phone}"
