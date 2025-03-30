@@ -1,13 +1,8 @@
 from django.db import models
-from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.text import slugify
 from django.utils.crypto import get_random_string
 from django.core.validators import MinValueValidator
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from django.conf import settings
-from pathlib import Path
 
 
 class Staff(models.Model):
@@ -71,20 +66,17 @@ class Component(models.Model):
     type = models.CharField(
         max_length=20, choices=TYPE_CHOICES, verbose_name="Тип элемента"
     )
-    name = models.CharField(verbose_name="Название",
-                            max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, default=1.00, verbose_name="Стоимость (руб.)"
     )
-    image = models.ImageField(
-        verbose_name="Изображение", blank=True, null=True)
+    image = models.ImageField(verbose_name="Изображение", blank=True, null=True)
     note = models.CharField(
         verbose_name="Примечания",
         max_length=100,
         blank=True,
     )
-    stock = models.PositiveIntegerField(
-        default=0, verbose_name="Стоковое количество")
+    stock = models.PositiveIntegerField(default=0, verbose_name="Стоковое количество")
 
     def __str__(self):
         return self.name
@@ -99,8 +91,7 @@ class Component(models.Model):
 class Bouquet(models.Model):
     """Модель букета"""
 
-    name = models.CharField(verbose_name="Название",
-                            max_length=50, unique=True)
+    name = models.CharField(verbose_name="Название", max_length=50, unique=True)
     base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -171,8 +162,7 @@ class Order(models.Model):
 
 class Event(models.Model):
 
-    name = models.CharField(
-        max_length=200, verbose_name="Тип события", unique=True)
+    name = models.CharField(max_length=200, verbose_name="Тип события", unique=True)
 
     def __str__(self):
         return self.name
@@ -184,31 +174,39 @@ class Event(models.Model):
 
 class PriceRange(models.Model):
     name = models.CharField(
-        max_length=100, help_text="Название диапазона (например, 'До 1 000 руб')"
+        max_length=100, verbose_name="Название диапазона (например, 'До 1 000 руб')", unique=True
     )
     min_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Минимальная цена (может быть NULL для отсутствия ограничения)",
+        verbose_name="Минимальная цена (может быть NULL для отсутствия ограничения)",
     )
     max_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Максимальная цена (может быть NULL для отсутствия ограничений)",
+        verbose_name="Максимальная цена (может быть NULL для отсутствия ограничений)",
     )
+    
+    def get_name(self):
+        if self.min_price and self.max_price:
+            return f"От {int(self.min_price)} до {int(self.max_price)} руб."
+        elif self.min_price:
+            return f"От {int(self.min_price)} руб."
+        elif self.max_price:
+            return f"До {int(self.max_price)} руб."
+        return
 
     def __str__(self):
-        if self.min_price and self.max_price:
-            return f"{self.name} ({self.min_price} - {self.max_price})"
-        elif self.min_price:
-            return f"{self.name} (От {self.min_price})"
-        elif self.max_price:
-            return f"{self.name} (До {self.max_price})"
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = self.get_name()
+        super().save(*args, **kwargs)
 
 
 class Consultation(models.Model):
@@ -219,8 +217,7 @@ class Consultation(models.Model):
     agreed_to_privacy = models.BooleanField(
         verbose_name="Согласие на обработку данных", default=False
     )
-    created_at = models.DateTimeField(
-        verbose_name="Дата создания", auto_now_add=True)
+    created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} - {self.phone}"
@@ -228,9 +225,3 @@ class Consultation(models.Model):
     class Meta:
         verbose_name = "Консультация"
         verbose_name_plural = "Консультации"
-
-
-@receiver(pre_save, sender=Bouquet)
-def calculate_price(sender, instance, **kwargs):
-    if instance.pk:
-        instance.total_price = instance.get_price()

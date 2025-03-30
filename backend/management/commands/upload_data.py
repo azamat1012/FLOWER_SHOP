@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 import json
-from backend.models import Component, Bouquet, BouquetComponent, Event
+from backend.models import Component, Bouquet, BouquetComponent, Event, PriceRange
 from django.db import transaction
 from django.core.files import File
 from pathlib import Path
@@ -30,6 +30,18 @@ class Command(BaseCommand):
                 data = json.load(jfile)
 
             with transaction.atomic():
+                
+                for price_item in data.get("prices", []):
+                    price_name=price_item.get("name", '')
+                    min_price = price_item.get("min_price", 0)
+                    max_price = price_item.get("max_price", 0)
+                    price, created = PriceRange.objects.get_or_create(name=price_name, min_price=min_price, max_price=max_price)
+                    if created:
+                        self.stdout.write(
+                            self.style.SUCCESS(f"Добавлен интервал цен: {price.name}")
+                        )
+
+                        
 
                 components = {}
                 for component_data in data.get("components", []):
@@ -74,6 +86,12 @@ class Command(BaseCommand):
                     if bouquet_data.get("image") and media_root:
                         image_path = Path(media_root) / bouquet_image
                         if image_path.exists():
+                            with open(image_path, "rb") as img_file:
+                                bouquet.image.save(
+                                    bouquet_data["image"], File(img_file), save=True
+                                )
+                        else:
+                            image_path = Path(media_root) / 'images/default.jpg'
                             with open(image_path, "rb") as img_file:
                                 bouquet.image.save(
                                     bouquet_data["image"], File(img_file), save=True
