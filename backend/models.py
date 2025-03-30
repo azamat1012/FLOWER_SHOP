@@ -99,7 +99,7 @@ class Bouquet(models.Model):
     base_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        default=1.00,
+        default=0.00,
         verbose_name="Стоимость оформления (руб.)",
     )
     image = models.ImageField(verbose_name="Изображение", null=True, blank=True)
@@ -112,7 +112,7 @@ class Bouquet(models.Model):
     )
 
     def get_price(self):
-        total_price = 0
+        total_price = self.base_price
         for bouquet_component in self.components.all():
             total_price += (
                 bouquet_component.component.price * bouquet_component.quantity
