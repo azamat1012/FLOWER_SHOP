@@ -2,7 +2,7 @@
 from django.views.generic import DetailView
 
 from FlowerShop import settings
-from .models import Bouquet, Consultation, Order, PriceRange
+from .models import Bouquet, Consultation, Order, PriceRange, Event
 
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -100,7 +100,8 @@ def get_quiz_first(request):
         event = request.POST.get('event')
         request.session['event'] = event
         return redirect('quiz_2')
-    return render(request, 'quiz.html')
+    events = Event.objects.all()
+    return render(request, 'quiz.html',{'events': events})
 
 
 def get_quiz_second(request):

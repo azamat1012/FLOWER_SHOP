@@ -19,9 +19,9 @@
         <h1 class="quiz__title">К какому событию нужен букет?</h1>
         <form method="POST" class="quiz__elems fic">
           {% csrf_token %}
-          <button type="submit" name="event" value="wedding" class="quiz__elem">Свадьба</button>
-          <button type="submit" name="event" value="birthday" class="quiz__elem">День рождения</button>
-          <button type="submit" name="event" value="no_occasion" class="quiz__elem">Без повода</button>
+            {% for event in events %}
+                <button type="submit" name="event" value={{ event.name }} class="quiz__elem">{{ event.name }}</button>
+            {% endfor %}
         </form>
         <div class="quiz__progress">
           <div class="quiz__progress_step">
