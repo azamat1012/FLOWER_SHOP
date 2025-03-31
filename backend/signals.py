@@ -26,6 +26,6 @@ def notify_telegram_consultation(sender, instance, created, **kwargs):
     if created:
         message = (f"Требуется консультация!\n"
             f"Клиент: {instance.name}\n "
-            f"Адрес: {instance.phone}\n"
+            f"Телефон: {instance.phone}\n"
         )
         bot.send_message(chat_id=TG_CHAT_ID, text=message)
