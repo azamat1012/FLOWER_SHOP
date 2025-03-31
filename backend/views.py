@@ -115,16 +115,19 @@ def get_quiz_second(request):
 
 
 def quiz_results(request):
-    event = request.session.get('event')
+    event_name = request.session.get('event')
     budget = request.session.get('budget')
     bouquets = Bouquet.objects.all()
-    event_display = {
-        "wedding": 'Свадьба',
-        "no_occasion": 'Без повода',
-        "birthday": 'День рождения',
-
-    }.get(event, event)
+    # event_display = {
+    #     "wedding": 'Свадьба',
+    #     "no_occasion": 'Без повода',
+    #     "birthday": 'День рождения',
+    #
+    # }.get(event, event)
     price_range = None
+    event = Event.objects.filter(name=event_name).first()
+    if event:
+        bouquets = bouquets.filter(events=event)
     if budget:
         price_range = PriceRange.objects.filter(name=budget).first()
         if price_range:
@@ -139,7 +142,7 @@ def quiz_results(request):
     is_there_any_fower = bouquets.exists()
     return render(request, 'result.html', {
         'is_there_any_flower': is_there_any_fower,
-        'event': event_display,
+        'event': event.name,
         'budget': budget,
         'bouquets': bouquets,
     })
