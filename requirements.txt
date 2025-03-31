@@ -4,3 +4,4 @@ yookassa==3.5.0
 pillow==11.1.0
 django-phonenumber-field==8.0.0
 phonenumbers==8.13.54
+python-telegram-bot==13.5
