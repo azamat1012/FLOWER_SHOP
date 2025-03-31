@@ -10,23 +10,25 @@
 <section id="result">
     <div class="container">
         <div class="result p100">
-            <div class="title">Мы подобрали специально для Вас</div>
-            <div class="result__subtitle">Событие: {{ event }}</div>
-            <div class="result__subtitle">Бюджет: {{ budget }}</div>
-            <div class="result__block ficb">
-                {% for bouquet in bouquets %}
-                <div class="result__items">
-                    <img src="{% if bouquet.image %}{{ bouquet.image.url }}{% endif %}" alt="{{ bouquet.name }}" class="result__block_img">
-                    <div class="title result__items_title">{{ bouquet.name }}</div>
-                    <div class="result__items_price">{{ bouquet.total_price }} руб.</div>
-                    <button class="btn result__items_btn" onclick="window.location.href='{% url 'create_order' %}?bouquet_id={{ bouquet.id }}'">Заказать букет</button>
-                    <hr class="result__items_line" />
-                </div>
-                {% empty %}
-                <div class="result__no-items">
-                    <p>К сожалению, мы не нашли букеты под выбранные критерии.</p>
-                </div>
+         {% if  not is_there_any_flower %}
+                <div class="title">К сожалению, мы не нашли букеты под выбранные критерии </div>
+        {% else %}
+                <div class="title">Мы подобрали специально для Вас </div>
+                <div class="result__subtitle">Событие: {{ event }}</div>
+                <div class="result__subtitle">Бюджет: {{ budget }}</div>
+                <div class="result__block ficb">
+                    {% for bouquet in bouquets %}
+                    <div class="result__items">
+                        <img src="{% if bouquet.image %}{{ bouquet.image.url }}{% endif %}" alt="{{ bouquet.name }}" class="result__block_img">
+                        <div class="title result__items_title">{{ bouquet.name }}</div>
+                        <div class="result__items_price">{{ bouquet.total_price }} руб.</div>
+                        <button class="btn result__items_btn" onclick="window.location.href='{% url 'create_order' %}?bouquet_id={{ bouquet.id }}'">Заказать букет</button>
+                        <hr class="result__items_line" />
+                    </div>
                 {% endfor %}
+
+         {% endif %}
+                
             </div>
             <div class="result__items_intro">Хотите что-то более специальное?</div>
             <div class="result__items_block">
@@ -41,10 +43,3 @@
 {% block footer %}
 	{% include "./base/footer.html" %}
 {% endblock footer %}
-
-
-
-
-
-	
-	
